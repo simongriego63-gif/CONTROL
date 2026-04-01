@@ -108,20 +108,9 @@
             background-color: #f1f8e9;
         }
 
-        .btn-eliminar-usuario {
-            background-color: #e53935;
-            color: white;
-            border: none;
-            padding: 6px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            width: 100%;
-            transition: background-color 0.2s;
-        }
-
-        .btn-eliminar-usuario:hover { background-color: #c62828; }
-
+        .btn-peligro { background-color: #d32f2f; }
+        .btn-peligro:hover { background-color: #b71c1c; }
+        
         /* Modales */
         .modal-overlay {
             display: none;
@@ -190,9 +179,10 @@
 
     <h1>Control de Horarios</h1>
 
-    <div class="action-bar">
+   <div class="action-bar">
         <button class="btn-principal" id="btnAbrirRegistro">Entrada / Salida</button>
         <button class="btn-principal btn-secundario" id="btnAbrirAgregar">Agregar Usuario</button>
+        <button class="btn-principal btn-peligro" id="btnAbrirEliminar">Eliminar Usuario</button>
     </div>
 
     <div class="grid-usuarios" id="contenedorUsuarios"></div>
@@ -222,7 +212,17 @@
             <button class="btn-cancelar" onclick="cerrarModales()">Cancelar</button>
         </div>
     </div>
-
+<div class="modal-overlay" id="modalEliminar">
+        <div class="modal-content">
+            <h3>Eliminar Empleado</h3>
+            <select id="selectUsuarioEliminar">
+                <option value="">-- Selecciona a quién eliminar --</option>
+            </select>
+            <p class="mensaje-error" id="errorEliminar">Selecciona un usuario válido.</p>
+            <button class="btn-accion" id="btnConfirmarEliminar" style="background-color: #d32f2f;">Eliminar Definitivamente</button>
+            <button class="btn-cancelar" onclick="cerrarModales()">Cancelar</button>
+        </div>
+    </div>
     <script>
         // ¡PEGAR AQUÍ LA URL QUE TE DIO GOOGLE APPS SCRIPT!
         const URL_GOOGLE_SHEET = "PEGA_TU_URL_AQUI";
@@ -235,13 +235,14 @@
 
         const diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 
-        // RENDERIZAR INTERFAZ
-        function actualizarInterfaz() {
+     function actualizarInterfaz() {
             const contenedorUsuarios = document.getElementById('contenedorUsuarios');
             const selectUsuarioRegistro = document.getElementById('selectUsuarioRegistro');
+            const selectUsuarioEliminar = document.getElementById('selectUsuarioEliminar'); 
             
             contenedorUsuarios.innerHTML = '';
             selectUsuarioRegistro.innerHTML = '<option value="">-- Selecciona tu nombre --</option>';
+            if(selectUsuarioEliminar) selectUsuarioEliminar.innerHTML = '<option value="">-- Selecciona a quién eliminar --</option>'; 
 
             usuarios.forEach(user => {
                 const tarjeta = document.createElement('div');
@@ -258,7 +259,6 @@
                             <div>Salida: <span class="hora-dato">${horaSalida}</span></div>
                         </div>
                     </div>
-                    <button class="btn-eliminar-usuario" onclick="eliminarUsuario(${user.id})">Eliminar a ${user.nombre}</button>
                 `;
                 contenedorUsuarios.appendChild(tarjeta);
 
@@ -266,18 +266,19 @@
                 opcion.value = user.id;
                 opcion.textContent = user.nombre;
                 selectUsuarioRegistro.appendChild(opcion);
+
+                if(selectUsuarioEliminar) {
+                    const opcionEliminar = document.createElement('option');
+                    opcionEliminar.value = user.id;
+                    opcionEliminar.textContent = user.nombre;
+                    selectUsuarioEliminar.appendChild(opcionEliminar);
+                }
             });
         }
-
-        window.eliminarUsuario = function(id) {
-            const user = usuarios.find(u => u.id === id);
-            if(confirm(`¿Estás seguro de que deseas eliminar a ${user.nombre}?`)) {
-                usuarios = usuarios.filter(u => u.id !== id);
-                actualizarInterfaz();
-            }
-        };
-
         function cerrarModales() {
+            document.getElementById('modalEliminar').style.display = 'none';
+            document.getElementById('selectUsuarioEliminar').value = '';
+            document.getElementById('errorEliminar').style.display = 'none';
             document.getElementById('modalRegistro').style.display = 'none';
             document.getElementById('modalAgregar').style.display = 'none';
             document.getElementById('inputPasswordRegistro').value = '';
