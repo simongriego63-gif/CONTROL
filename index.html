@@ -416,7 +416,26 @@
             cerrarModales();
             actualizarInterfaz();
         });
+document.getElementById('btnAbrirEliminar').addEventListener('click', () => {
+            document.getElementById('modalEliminar').style.display = 'flex';
+        });
 
+        document.getElementById('btnConfirmarEliminar').addEventListener('click', () => {
+            const idSeleccionado = document.getElementById('selectUsuarioEliminar').value;
+            const msjError = document.getElementById('errorEliminar');
+
+            if (!idSeleccionado) {
+                msjError.style.display = 'block';
+                return;
+            }
+
+            const user = usuarios.find(u => u.id == idSeleccionado);
+            if(confirm(`¿Estás seguro de que deseas eliminar a ${user.nombre} definitivamente?`)) {
+                usuarios = usuarios.filter(u => u.id != idSeleccionado);
+                cerrarModales();
+                actualizarInterfaz();
+            }
+        });
         actualizarInterfaz();
     </script>
 </body>
